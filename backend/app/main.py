@@ -2,11 +2,13 @@ from fastapi import FastAPI
 from app.database import engine, Base
 from app import models  # noqa: F401 — registers models with SQLAlchemy
 from app.auth.router import router as auth_router
+from app.items.router import router as items_router
 
 app = FastAPI(title="Inventory Manager API")
 
 
 app.include_router(auth_router)
+app.include_router(items_router)
 
 
 @app.on_event("startup")
