@@ -4,6 +4,8 @@ import api from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import CreateItemModal from '../components/CreateItemModal'
 import EditItemModal from '../components/EditItemModal'
+import PurchaseModal from '../components/PurchaseModal'
+import AddFundsModal from '../components/AddFundsModal'
 
 interface Item {
   id: number
@@ -17,13 +19,15 @@ interface Item {
 }
 
 export default function InventoryPage() {
-  const { logout, role, username } = useAuth()
+  const { logout, role, username, balance, refreshBalance } = useAuth()
   const navigate = useNavigate()
   const [items, setItems] = useState<Item[]>([])
   const [error, setError] = useState('')
   const [borrowing, setBorrowing] = useState<number | null>(null)
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [editingItem, setEditingItem] = useState<Item | null>(null)
+  const [purchasingItem, setPurchasingItem] = useState<Item | null>(null)
+  const [showAddFunds, setShowAddFunds] = useState(false)
 
   const isManager = role === 'manager' || role === 'admin'
 
@@ -70,7 +74,7 @@ export default function InventoryPage() {
         <h1 className="text-xl font-bold">Inventory Manager</h1>
         <div className="flex items-center gap-4">
           <button onClick={() => navigate('/loans')} className="text-sm text-blue-600 hover:underline">
-            My Loans
+            My Activity
           </button>
           {role === 'admin' && (
             <button onClick={() => navigate('/admin')} className="text-sm text-purple-600 hover:underline">
@@ -82,6 +86,15 @@ export default function InventoryPage() {
               {username} <span className="capitalize text-gray-400">({role})</span>
             </span>
           )}
+          <span className="text-sm font-medium text-green-700 bg-green-50 px-2 py-1 rounded">
+            ${balance.toFixed(2)}
+          </span>
+          <button
+            onClick={() => setShowAddFunds(true)}
+            className="text-sm text-blue-600 hover:underline"
+          >
+            Add Funds
+          </button>
           <button onClick={handleLogout} className="text-sm text-gray-600 hover:text-red-500 transition">
             Log Out
           </button>
@@ -124,7 +137,15 @@ export default function InventoryPage() {
               </div>
 
               <div className="flex flex-col gap-2">
-                {item.item_type !== 'purchasable' && (
+                {item.item_type === 'purchasable' ? (
+                  <button
+                    onClick={() => setPurchasingItem(item)}
+                    disabled={item.available === 0}
+                    className="w-full bg-green-600 text-white py-2 rounded text-sm hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {item.available === 0 ? 'Out of Stock' : 'Buy'}
+                  </button>
+                ) : (
                   <button
                     onClick={() => handleBorrow(item.id)}
                     disabled={item.available === 0 || borrowing === item.id}
@@ -169,6 +190,19 @@ export default function InventoryPage() {
           onClose={() => setEditingItem(null)}
           onUpdated={handleUpdated}
         />
+      )}
+      {purchasingItem && (
+        <PurchaseModal
+          item={purchasingItem}
+          onClose={() => setPurchasingItem(null)}
+          onPurchased={(itemId, quantity) => {
+            setItems(items.map(i => i.id === itemId ? { ...i, available: i.available - quantity } : i))
+            refreshBalance()
+          }}
+        />
+      )}
+      {showAddFunds && (
+        <AddFundsModal onClose={() => setShowAddFunds(false)} />
       )}
     </div>
   )

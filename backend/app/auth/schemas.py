@@ -30,6 +30,7 @@ class UserResponse(BaseModel):
     email: str
     role: UserRole
     department: str | None
+    balance: float
 
     class Config:
         from_attributes = True

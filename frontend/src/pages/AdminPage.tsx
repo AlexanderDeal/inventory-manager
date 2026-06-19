@@ -10,6 +10,7 @@ interface User {
   role: string
   department: string | null
   is_active: boolean
+  balance: number
 }
 
 interface Loan {
@@ -30,6 +31,7 @@ export default function AdminPage() {
   const [itemMap, setItemMap] = useState<Record<number, string>>({})
   const [userMap, setUserMap] = useState<Record<number, string>>({})
   const [activeTab, setActiveTab] = useState<'users' | 'loans'>('users')
+  const [editingBalance, setEditingBalance] = useState<Record<number, string>>({})
 
   useEffect(() => {
     Promise.all([
@@ -56,6 +58,15 @@ export default function AdminPage() {
   async function toggleActive(userId: number, is_active: boolean) {
     await api.patch(`/users/${userId}/active`, { is_active })
     setUsers(users.map(u => u.id === userId ? { ...u, is_active } : u))
+  }
+
+  async function saveBalance(userId: number) {
+    const raw = editingBalance[userId]
+    const parsed = parseFloat(raw)
+    if (isNaN(parsed) || parsed < 0) return
+    await api.patch(`/users/${userId}/balance`, { balance: parsed })
+    setUsers(users.map(u => u.id === userId ? { ...u, balance: parsed } : u))
+    setEditingBalance(prev => { const next = { ...prev }; delete next[userId]; return next })
   }
 
   function handleLogout() {
@@ -115,6 +126,7 @@ export default function AdminPage() {
                   <th className="px-4 py-3 font-medium text-gray-600">Email</th>
                   <th className="px-4 py-3 font-medium text-gray-600">Department</th>
                   <th className="px-4 py-3 font-medium text-gray-600">Role</th>
+                  <th className="px-4 py-3 font-medium text-gray-600">Balance</th>
                   <th className="px-4 py-3 font-medium text-gray-600">Status</th>
                 </tr>
               </thead>
@@ -135,6 +147,29 @@ export default function AdminPage() {
                         <option value="manager">Manager</option>
                         <option value="admin">Admin</option>
                       </select>
+                    </td>
+                    <td className="px-4 py-3">
+                      {editingBalance[user.id] !== undefined ? (
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={editingBalance[user.id]}
+                            onChange={e => setEditingBalance(prev => ({ ...prev, [user.id]: e.target.value }))}
+                            className="w-20 border border-gray-300 rounded px-2 py-0.5 text-sm"
+                          />
+                          <button onClick={() => saveBalance(user.id)} className="text-xs text-green-600 hover:underline">Save</button>
+                          <button onClick={() => setEditingBalance(prev => { const n = { ...prev }; delete n[user.id]; return n })} className="text-xs text-gray-400 hover:underline">✕</button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setEditingBalance(prev => ({ ...prev, [user.id]: user.balance.toFixed(2) }))}
+                          className="text-sm text-gray-700 hover:text-blue-600"
+                        >
+                          ${user.balance.toFixed(2)}
+                        </button>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <button
