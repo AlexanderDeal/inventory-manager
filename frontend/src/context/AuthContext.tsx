@@ -5,6 +5,7 @@ import api from '../api/client'
 interface AuthContextType {
   token: string | null
   role: string | null
+  username: string | null
   login: (token: string) => void
   logout: () => void
   isLoggedIn: boolean
@@ -15,20 +16,24 @@ const AuthContext = createContext<AuthContextType | null>(null)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'))
   const [role, setRole] = useState<string | null>(null)
+  const [username, setUsername] = useState<string | null>(null)
 
-  // Fetch the current user's role whenever the token changes
   useEffect(() => {
     if (token) {
       api.get('/auth/me')
-        .then(res => setRole(res.data.role))
+        .then(res => {
+          setRole(res.data.role)
+          setUsername(res.data.username)
+        })
         .catch(() => {
-          // Token is invalid or expired — log out
           localStorage.removeItem('token')
           setToken(null)
           setRole(null)
+          setUsername(null)
         })
     } else {
       setRole(null)
+      setUsername(null)
     }
   }, [token])
 
@@ -41,10 +46,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('token')
     setToken(null)
     setRole(null)
+    setUsername(null)
   }
 
   return (
-    <AuthContext.Provider value={{ token, role, login, logout, isLoggedIn: !!token }}>
+    <AuthContext.Provider value={{ token, role, username, login, logout, isLoggedIn: !!token }}>
       {children}
     </AuthContext.Provider>
   )

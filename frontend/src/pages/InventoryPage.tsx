@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../api/client'
 import { useAuth } from '../context/AuthContext'
+import CreateItemModal from '../components/CreateItemModal'
 
 interface Item {
   id: number
@@ -20,6 +21,7 @@ export default function InventoryPage() {
   const [items, setItems] = useState<Item[]>([])
   const [error, setError] = useState('')
   const [borrowing, setBorrowing] = useState<number | null>(null)
+  const [showCreateModal, setShowCreateModal] = useState(false)
 
   useEffect(() => {
     api.get('/items/')
@@ -74,7 +76,17 @@ export default function InventoryPage() {
       </nav>
 
       <div className="max-w-5xl mx-auto p-6">
-        <h2 className="text-lg font-semibold mb-4">Available Items</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold">Available Items</h2>
+          {(role === 'manager' || role === 'admin') && (
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 transition"
+            >
+              + Add Item
+            </button>
+          )}
+        </div>
 
         {error && <p className="text-red-500 mb-4">{error}</p>}
 
@@ -111,6 +123,13 @@ export default function InventoryPage() {
           ))}
         </div>
       </div>
+
+      {showCreateModal && (
+        <CreateItemModal
+          onClose={() => setShowCreateModal(false)}
+          onCreated={item => setItems([...items, item])}
+        />
+      )}
     </div>
   )
 }
