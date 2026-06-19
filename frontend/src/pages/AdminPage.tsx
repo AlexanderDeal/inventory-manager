@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import api from '../api/client'
-import { useAuth } from '../context/AuthContext'
+import Navbar from '../components/Navbar'
 
 interface User {
   id: number
@@ -24,8 +23,6 @@ interface Loan {
 }
 
 export default function AdminPage() {
-  const { logout, username, role } = useAuth()
-  const navigate = useNavigate()
   const [users, setUsers] = useState<User[]>([])
   const [loans, setLoans] = useState<Loan[]>([])
   const [itemMap, setItemMap] = useState<Record<number, string>>({})
@@ -69,35 +66,9 @@ export default function AdminPage() {
     setEditingBalance(prev => { const next = { ...prev }; delete next[userId]; return next })
   }
 
-  function handleLogout() {
-    logout()
-    navigate('/login')
-  }
-
   return (
     <div className="min-h-screen bg-gray-100">
-      <nav className="bg-white shadow px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-4">
-          <h1 className="text-xl font-bold">Inventory Manager</h1>
-          <button
-            onClick={() => navigate('/inventory')}
-            className="text-sm text-blue-600 hover:underline"
-          >
-            Inventory
-          </button>
-          <span className="text-sm font-medium text-purple-600">Admin Dashboard</span>
-        </div>
-        <div className="flex items-center gap-4">
-          {username && (
-            <span className="text-sm text-gray-500">
-              {username} <span className="capitalize text-gray-400">({role})</span>
-            </span>
-          )}
-          <button onClick={handleLogout} className="text-sm text-gray-600 hover:text-red-500">
-            Log Out
-          </button>
-        </div>
-      </nav>
+      <Navbar />
 
       <div className="max-w-6xl mx-auto p-6">
         {/* Tabs */}

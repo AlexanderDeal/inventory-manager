@@ -6,6 +6,8 @@ interface AuthContextType {
   token: string | null
   role: string | null
   username: string | null
+  email: string | null
+  department: string | null
   balance: number
   refreshBalance: () => void
   login: (token: string) => void
@@ -19,6 +21,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'))
   const [role, setRole] = useState<string | null>(null)
   const [username, setUsername] = useState<string | null>(null)
+  const [email, setEmail] = useState<string | null>(null)
+  const [department, setDepartment] = useState<string | null>(null)
   const [balance, setBalance] = useState<number>(0)
 
   function fetchMe() {
@@ -26,6 +30,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .then(res => {
         setRole(res.data.role)
         setUsername(res.data.username)
+        setEmail(res.data.email)
+        setDepartment(res.data.department ?? null)
         setBalance(res.data.balance ?? 0)
       })
       .catch(() => {
@@ -33,6 +39,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setToken(null)
         setRole(null)
         setUsername(null)
+        setEmail(null)
+        setDepartment(null)
         setBalance(0)
       })
   }
@@ -43,6 +51,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } else {
       setRole(null)
       setUsername(null)
+      setEmail(null)
+      setDepartment(null)
       setBalance(0)
     }
   }, [token])
@@ -61,11 +71,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(null)
     setRole(null)
     setUsername(null)
+    setEmail(null)
+    setDepartment(null)
     setBalance(0)
   }
 
   return (
-    <AuthContext.Provider value={{ token, role, username, balance, refreshBalance, login, logout, isLoggedIn: !!token }}>
+    <AuthContext.Provider value={{ token, role, username, email, department, balance, refreshBalance, login, logout, isLoggedIn: !!token }}>
       {children}
     </AuthContext.Provider>
   )

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import User, UserRole
-from app.auth.schemas import RegisterRequest, LoginRequest, TokenResponse, UserResponse
+from app.auth.schemas import RegisterRequest, LoginRequest, TokenResponse, UserResponse, ChangePasswordRequest
 from app.auth.security import hash_password, verify_password, create_access_token
 from app.auth.dependencies import get_current_user, require_roles
 
@@ -72,6 +72,22 @@ def admin_register(
 def me(current_user=Depends(get_current_user)):
     """Return the currently logged-in user's info."""
     return current_user
+
+
+@router.post("/password", status_code=200)
+def change_password(
+    body: ChangePasswordRequest,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """Change the current user's password."""
+    if not verify_password(body.current_password, current_user.password_hash):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    if len(body.new_password) < 8:
+        raise HTTPException(status_code=400, detail="New password must be at least 8 characters")
+    current_user.password_hash = hash_password(body.new_password)
+    db.commit()
+    return {"message": "Password updated"}
 
 
 @router.post("/login", response_model=TokenResponse)

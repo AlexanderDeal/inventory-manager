@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import api from '../api/client'
 import { useAuth } from '../context/AuthContext'
+import Navbar from '../components/Navbar'
 import CreateItemModal from '../components/CreateItemModal'
 import EditItemModal from '../components/EditItemModal'
 import PurchaseModal from '../components/PurchaseModal'
-import AddFundsModal from '../components/AddFundsModal'
 
 interface Item {
   id: number
@@ -19,15 +18,13 @@ interface Item {
 }
 
 export default function InventoryPage() {
-  const { logout, role, username, balance, refreshBalance } = useAuth()
-  const navigate = useNavigate()
+  const { role, refreshBalance } = useAuth()
   const [items, setItems] = useState<Item[]>([])
   const [error, setError] = useState('')
   const [borrowing, setBorrowing] = useState<number | null>(null)
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [editingItem, setEditingItem] = useState<Item | null>(null)
   const [purchasingItem, setPurchasingItem] = useState<Item | null>(null)
-  const [showAddFunds, setShowAddFunds] = useState(false)
 
   const isManager = role === 'manager' || role === 'admin'
 
@@ -63,43 +60,9 @@ export default function InventoryPage() {
     setItems(items.map(i => i.id === updated.id ? updated : i))
   }
 
-  function handleLogout() {
-    logout()
-    navigate('/login')
-  }
-
   return (
     <div className="min-h-screen bg-gray-100">
-      <nav className="bg-white shadow px-6 py-4 flex justify-between items-center">
-        <h1 className="text-xl font-bold">Inventory Manager</h1>
-        <div className="flex items-center gap-4">
-          <button onClick={() => navigate('/loans')} className="text-sm text-blue-600 hover:underline">
-            My Activity
-          </button>
-          {role === 'admin' && (
-            <button onClick={() => navigate('/admin')} className="text-sm text-purple-600 hover:underline">
-              Admin Dashboard
-            </button>
-          )}
-          {username && (
-            <span className="text-sm text-gray-500">
-              {username} <span className="capitalize text-gray-400">({role})</span>
-            </span>
-          )}
-          <span className="text-sm font-medium text-green-700 bg-green-50 px-2 py-1 rounded">
-            ${balance.toFixed(2)}
-          </span>
-          <button
-            onClick={() => setShowAddFunds(true)}
-            className="text-sm text-blue-600 hover:underline"
-          >
-            Add Funds
-          </button>
-          <button onClick={handleLogout} className="text-sm text-gray-600 hover:text-red-500 transition">
-            Log Out
-          </button>
-        </div>
-      </nav>
+      <Navbar />
 
       <div className="max-w-5xl mx-auto p-6">
         <div className="flex justify-between items-center mb-4">
@@ -200,9 +163,6 @@ export default function InventoryPage() {
             refreshBalance()
           }}
         />
-      )}
-      {showAddFunds && (
-        <AddFundsModal onClose={() => setShowAddFunds(false)} />
       )}
     </div>
   )
