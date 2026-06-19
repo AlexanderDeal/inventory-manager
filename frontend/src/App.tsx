@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import InventoryPage from './pages/InventoryPage'
+import LoansPage from './pages/LoansPage'
 import AdminPage from './pages/AdminPage'
 
 // Protects routes that require login — redirects to /login if not authenticated
@@ -21,6 +22,14 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <InventoryPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/loans"
+        element={
+          <PrivateRoute>
+            <LoansPage />
           </PrivateRoute>
         }
       />

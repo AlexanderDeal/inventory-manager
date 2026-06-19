@@ -27,11 +27,25 @@ export default function AdminPage() {
   const navigate = useNavigate()
   const [users, setUsers] = useState<User[]>([])
   const [loans, setLoans] = useState<Loan[]>([])
+  const [itemMap, setItemMap] = useState<Record<number, string>>({})
+  const [userMap, setUserMap] = useState<Record<number, string>>({})
   const [activeTab, setActiveTab] = useState<'users' | 'loans'>('users')
 
   useEffect(() => {
-    api.get('/users/').then(res => setUsers(res.data))
-    api.get('/loans/').then(res => setLoans(res.data))
+    Promise.all([
+      api.get('/users/'),
+      api.get('/loans/'),
+      api.get('/items/'),
+    ]).then(([usersRes, loansRes, itemsRes]) => {
+      setUsers(usersRes.data)
+      setLoans(loansRes.data)
+      const iMap: Record<number, string> = {}
+      itemsRes.data.forEach((item: { id: number; name: string }) => { iMap[item.id] = item.name })
+      setItemMap(iMap)
+      const uMap: Record<number, string> = {}
+      usersRes.data.forEach((user: User) => { uMap[user.id] = user.username })
+      setUserMap(uMap)
+    })
   }, [])
 
   async function updateRole(userId: number, role: string) {
@@ -137,8 +151,8 @@ export default function AdminPage() {
               <thead className="bg-gray-50 text-left">
                 <tr>
                   <th className="px-4 py-3 font-medium text-gray-600">Loan ID</th>
-                  <th className="px-4 py-3 font-medium text-gray-600">User ID</th>
-                  <th className="px-4 py-3 font-medium text-gray-600">Item ID</th>
+                  <th className="px-4 py-3 font-medium text-gray-600">User</th>
+                  <th className="px-4 py-3 font-medium text-gray-600">Item</th>
                   <th className="px-4 py-3 font-medium text-gray-600">Status</th>
                   <th className="px-4 py-3 font-medium text-gray-600">Loaned At</th>
                   <th className="px-4 py-3 font-medium text-gray-600">Returned At</th>
@@ -148,8 +162,8 @@ export default function AdminPage() {
                 {loans.map(loan => (
                   <tr key={loan.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3">#{loan.id}</td>
-                    <td className="px-4 py-3">#{loan.user_id}</td>
-                    <td className="px-4 py-3">#{loan.item_id}</td>
+                    <td className="px-4 py-3">{userMap[loan.user_id] || `#${loan.user_id}`}</td>
+                    <td className="px-4 py-3">{itemMap[loan.item_id] || `#${loan.item_id}`}</td>
                     <td className="px-4 py-3">
                       <span className={`text-xs px-2 py-1 rounded ${loan.status === 'active' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>
                         {loan.status}
