@@ -16,7 +16,7 @@ interface Item {
 }
 
 export default function InventoryPage() {
-  const { logout, role } = useAuth()
+  const { logout, role, username } = useAuth()
   const navigate = useNavigate()
   const [items, setItems] = useState<Item[]>([])
   const [error, setError] = useState('')
@@ -52,24 +52,20 @@ export default function InventoryPage() {
       <nav className="bg-white shadow px-6 py-4 flex justify-between items-center">
         <h1 className="text-xl font-bold">Inventory Manager</h1>
         <div className="flex items-center gap-4">
-          <button
-            onClick={() => navigate('/loans')}
-            className="text-sm text-blue-600 hover:underline"
-          >
+          <button onClick={() => navigate('/loans')} className="text-sm text-blue-600 hover:underline">
             My Loans
           </button>
           {role === 'admin' && (
-            <button
-              onClick={() => navigate('/admin')}
-              className="text-sm text-purple-600 hover:underline"
-            >
+            <button onClick={() => navigate('/admin')} className="text-sm text-purple-600 hover:underline">
               Admin Dashboard
             </button>
           )}
-          <button
-            onClick={handleLogout}
-            className="text-sm text-gray-600 hover:text-red-500 transition"
-          >
+          {username && (
+            <span className="text-sm text-gray-500">
+              {username} <span className="capitalize text-gray-400">({role})</span>
+            </span>
+          )}
+          <button onClick={handleLogout} className="text-sm text-gray-600 hover:text-red-500 transition">
             Log Out
           </button>
         </div>

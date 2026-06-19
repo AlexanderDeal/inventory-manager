@@ -23,7 +23,7 @@ interface Loan {
 }
 
 export default function AdminPage() {
-  const { logout } = useAuth()
+  const { logout, username, role } = useAuth()
   const navigate = useNavigate()
   const [users, setUsers] = useState<User[]>([])
   const [loans, setLoans] = useState<Loan[]>([])
@@ -76,9 +76,16 @@ export default function AdminPage() {
           </button>
           <span className="text-sm font-medium text-purple-600">Admin Dashboard</span>
         </div>
-        <button onClick={handleLogout} className="text-sm text-gray-600 hover:text-red-500">
-          Log Out
-        </button>
+        <div className="flex items-center gap-4">
+          {username && (
+            <span className="text-sm text-gray-500">
+              {username} <span className="capitalize text-gray-400">({role})</span>
+            </span>
+          )}
+          <button onClick={handleLogout} className="text-sm text-gray-600 hover:text-red-500">
+            Log Out
+          </button>
+        </div>
       </nav>
 
       <div className="max-w-6xl mx-auto p-6">
