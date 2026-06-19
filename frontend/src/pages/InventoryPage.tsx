@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import api from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import CreateItemModal from '../components/CreateItemModal'
+import EditItemModal from '../components/EditItemModal'
 
 interface Item {
   id: number
@@ -22,6 +23,9 @@ export default function InventoryPage() {
   const [error, setError] = useState('')
   const [borrowing, setBorrowing] = useState<number | null>(null)
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [editingItem, setEditingItem] = useState<Item | null>(null)
+
+  const isManager = role === 'manager' || role === 'admin'
 
   useEffect(() => {
     api.get('/items/')
@@ -33,13 +37,26 @@ export default function InventoryPage() {
     setBorrowing(itemId)
     try {
       await api.post('/loans/', { item_id: itemId, due_date: null })
-      // Update available count locally so user sees it immediately
       setItems(items.map(i => i.id === itemId ? { ...i, available: i.available - 1 } : i))
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to borrow item')
     } finally {
       setBorrowing(null)
     }
+  }
+
+  async function handleDelete(itemId: number) {
+    if (!confirm('Are you sure you want to delete this item?')) return
+    try {
+      await api.delete(`/items/${itemId}`)
+      setItems(items.filter(i => i.id !== itemId))
+    } catch {
+      setError('Failed to delete item')
+    }
+  }
+
+  function handleUpdated(updated: Item) {
+    setItems(items.map(i => i.id === updated.id ? updated : i))
   }
 
   function handleLogout() {
@@ -74,7 +91,7 @@ export default function InventoryPage() {
       <div className="max-w-5xl mx-auto p-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold">Available Items</h2>
-          {(role === 'manager' || role === 'admin') && (
+          {isManager && (
             <button
               onClick={() => setShowCreateModal(true)}
               className="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 transition"
@@ -106,15 +123,35 @@ export default function InventoryPage() {
                 </div>
               </div>
 
-              {item.item_type !== 'purchasable' && (
-                <button
-                  onClick={() => handleBorrow(item.id)}
-                  disabled={item.available === 0 || borrowing === item.id}
-                  className="w-full bg-blue-600 text-white py-2 rounded text-sm hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {borrowing === item.id ? 'Borrowing...' : item.available === 0 ? 'Unavailable' : 'Borrow'}
-                </button>
-              )}
+              <div className="flex flex-col gap-2">
+                {item.item_type !== 'purchasable' && (
+                  <button
+                    onClick={() => handleBorrow(item.id)}
+                    disabled={item.available === 0 || borrowing === item.id}
+                    className="w-full bg-blue-600 text-white py-2 rounded text-sm hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {borrowing === item.id ? 'Borrowing...' : item.available === 0 ? 'Unavailable' : 'Borrow'}
+                  </button>
+                )}
+                {isManager && (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setEditingItem(item)}
+                      className="flex-1 border border-gray-300 text-gray-600 py-1.5 rounded text-sm hover:bg-gray-50 transition"
+                    >
+                      Edit
+                    </button>
+                    {role === 'admin' && (
+                      <button
+                        onClick={() => handleDelete(item.id)}
+                        className="flex-1 border border-red-300 text-red-500 py-1.5 rounded text-sm hover:bg-red-50 transition"
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -124,6 +161,13 @@ export default function InventoryPage() {
         <CreateItemModal
           onClose={() => setShowCreateModal(false)}
           onCreated={item => setItems([...items, item])}
+        />
+      )}
+      {editingItem && (
+        <EditItemModal
+          item={editingItem}
+          onClose={() => setEditingItem(null)}
+          onUpdated={handleUpdated}
         />
       )}
     </div>
