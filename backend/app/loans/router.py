@@ -1,8 +1,9 @@
-from datetime import datetime
+from datetime import datetime, timezone
+from math import ceil
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models import Loan, Item, LoanStatus, UserRole
+from app.models import Loan, Item, LoanStatus, ItemType, UserRole, Transaction, TransactionType
 from app.loans.schemas import LoanCreate, LoanResponse
 from app.auth.dependencies import get_current_user, require_roles
 
@@ -26,13 +27,35 @@ def create_loan(
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
 
-    if item.item_type.value == "purchasable":
+    if item.item_type == ItemType.purchasable:
         raise HTTPException(status_code=400, detail="Purchasable items cannot be loaned")
 
     if item.available < 1:
         raise HTTPException(status_code=400, detail="No units available for this item")
 
-    # Reduce available count
+    # Rentable items require a due date and charge a daily fee
+    if item.item_type == ItemType.rentable:
+        if not body.due_date:
+            raise HTTPException(status_code=400, detail="Rentable items require a return date")
+        now = datetime.now(timezone.utc)
+        due = body.due_date if body.due_date.tzinfo else body.due_date.replace(tzinfo=timezone.utc)
+        days = max(1, ceil((due - now).total_seconds() / 86400))
+        rental_cost = (item.price or 0) * days
+        if rental_cost > 0:
+            if current_user.balance < rental_cost:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Insufficient balance. Need ${rental_cost:.2f}, you have ${current_user.balance:.2f}",
+                )
+            current_user.balance -= rental_cost
+            db.add(Transaction(
+                user_id=current_user.id,
+                item_id=item.id,
+                transaction_type=TransactionType.rental,
+                quantity=1,
+                total_price=rental_cost,
+            ))
+
     item.available -= 1
 
     loan = Loan(

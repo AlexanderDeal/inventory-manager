@@ -119,9 +119,11 @@ export default function EditItemModal({ item, onClose, onUpdated }: Props) {
               className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          {item.item_type === 'purchasable' && (
+          {(item.item_type === 'purchasable' || item.item_type === 'rentable') && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {item.item_type === 'rentable' ? 'Daily Rate ($/day)' : 'Price ($)'}
+              </label>
               <input
                 type="number"
                 name="price"

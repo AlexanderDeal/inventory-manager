@@ -61,6 +61,10 @@ export default function LoansPage() {
   const activeLoans = loans.filter(l => l.status === 'active')
   const pastLoans = loans.filter(l => l.status !== 'active')
 
+  function isOverdue(loan: Loan) {
+    return !!loan.due_date && new Date(loan.due_date) < new Date()
+  }
+
   return (
     <div className="min-h-screen bg-gray-100">
       <Navbar />
@@ -92,15 +96,24 @@ export default function LoansPage() {
               <p className="text-gray-500 mb-8">No active loans.</p>
             ) : (
               <div className="space-y-3 mb-8">
-                {activeLoans.map(loan => (
-                  <div key={loan.id} className="bg-white rounded-lg shadow p-4 flex justify-between items-center">
+                {activeLoans.map(loan => {
+                  const overdue = isOverdue(loan)
+                  return (
+                  <div key={loan.id} className={`rounded-lg shadow p-4 flex justify-between items-center ${overdue ? 'bg-red-50 border border-red-200' : 'bg-white'}`}>
                     <div>
-                      <p className="font-medium">{itemMap[loan.item_id] || `Item #${loan.item_id}`}</p>
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <p className="font-medium">{itemMap[loan.item_id] || `Item #${loan.item_id}`}</p>
+                        {overdue && (
+                          <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded font-medium">
+                            Overdue
+                          </span>
+                        )}
+                      </div>
                       <p className="text-sm text-gray-500">
                         Borrowed: {new Date(loan.loaned_at).toLocaleDateString()}
                       </p>
                       {loan.due_date && (
-                        <p className="text-sm text-orange-500">
+                        <p className={`text-sm ${overdue ? 'text-red-600 font-medium' : 'text-orange-500'}`}>
                           Due: {new Date(loan.due_date).toLocaleDateString()}
                         </p>
                       )}
@@ -112,6 +125,8 @@ export default function LoansPage() {
                       Return
                     </button>
                   </div>
+                  )
+                })}
                 ))}
               </div>
             )}

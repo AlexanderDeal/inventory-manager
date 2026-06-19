@@ -5,6 +5,7 @@ import Navbar from '../components/Navbar'
 import CreateItemModal from '../components/CreateItemModal'
 import EditItemModal from '../components/EditItemModal'
 import PurchaseModal from '../components/PurchaseModal'
+import RentModal from '../components/RentModal'
 
 interface Item {
   id: number
@@ -25,6 +26,7 @@ export default function InventoryPage() {
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [editingItem, setEditingItem] = useState<Item | null>(null)
   const [purchasingItem, setPurchasingItem] = useState<Item | null>(null)
+  const [rentingItem, setRentingItem] = useState<Item | null>(null)
 
   const isManager = role === 'manager' || role === 'admin'
 
@@ -85,7 +87,11 @@ export default function InventoryPage() {
               <div>
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="font-semibold text-gray-900">{item.name}</h3>
-                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded capitalize">
+                  <span className={`text-xs px-2 py-1 rounded capitalize ${
+                    item.item_type === 'purchasable' ? 'bg-green-100 text-green-700' :
+                    item.item_type === 'rentable' ? 'bg-purple-100 text-purple-700' :
+                    'bg-blue-100 text-blue-700'
+                  }`}>
                     {item.item_type}
                   </span>
                 </div>
@@ -95,7 +101,8 @@ export default function InventoryPage() {
                 <div className="text-sm text-gray-600 mb-4">
                   <p>Available: <span className="font-medium">{item.available}</span> / {item.quantity}</p>
                   {item.department && <p>Dept: {item.department}</p>}
-                  {item.price && <p>Price: ${item.price}</p>}
+                  {item.item_type === 'rentable' && item.price && <p className="text-blue-600 font-medium">${item.price}/day</p>}
+                  {item.item_type === 'purchasable' && item.price && <p>${item.price}</p>}
                 </div>
               </div>
 
@@ -107,6 +114,14 @@ export default function InventoryPage() {
                     className="w-full bg-green-600 text-white py-2 rounded text-sm hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {item.available === 0 ? 'Out of Stock' : 'Buy'}
+                  </button>
+                ) : item.item_type === 'rentable' ? (
+                  <button
+                    onClick={() => setRentingItem(item)}
+                    disabled={item.available === 0}
+                    className="w-full bg-purple-600 text-white py-2 rounded text-sm hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {item.available === 0 ? 'Unavailable' : 'Rent'}
                   </button>
                 ) : (
                   <button
@@ -162,6 +177,15 @@ export default function InventoryPage() {
             setItems(items.map(i => i.id === itemId ? { ...i, available: i.available - quantity } : i))
             refreshBalance()
           }}
+        />
+      )}
+      {rentingItem && (
+        <RentModal
+          item={rentingItem}
+          onClose={() => setRentingItem(null)}
+          onRented={itemId =>
+            setItems(items.map(i => i.id === itemId ? { ...i, available: i.available - 1 } : i))
+          }
         />
       )}
     </div>
