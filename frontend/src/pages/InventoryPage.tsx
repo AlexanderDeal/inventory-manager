@@ -15,7 +15,7 @@ interface Item {
 }
 
 export default function InventoryPage() {
-  const { logout } = useAuth()
+  const { logout, role } = useAuth()
   const navigate = useNavigate()
   const [items, setItems] = useState<Item[]>([])
   const [error, setError] = useState('')
@@ -35,12 +35,22 @@ export default function InventoryPage() {
     <div className="min-h-screen bg-gray-100">
       <nav className="bg-white shadow px-6 py-4 flex justify-between items-center">
         <h1 className="text-xl font-bold">Inventory Manager</h1>
-        <button
-          onClick={handleLogout}
-          className="text-sm text-gray-600 hover:text-red-500 transition"
-        >
-          Log Out
-        </button>
+        <div className="flex items-center gap-4">
+          {role === 'admin' && (
+            <button
+              onClick={() => navigate('/admin')}
+              className="text-sm text-purple-600 hover:underline"
+            >
+              Admin Dashboard
+            </button>
+          )}
+          <button
+            onClick={handleLogout}
+            className="text-sm text-gray-600 hover:text-red-500 transition"
+          >
+            Log Out
+          </button>
+        </div>
       </nav>
 
       <div className="max-w-5xl mx-auto p-6">

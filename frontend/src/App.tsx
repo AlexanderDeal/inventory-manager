@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import InventoryPage from './pages/InventoryPage'
+import AdminPage from './pages/AdminPage'
 
 // Protects routes that require login — redirects to /login if not authenticated
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -20,6 +21,14 @@ function AppRoutes() {
         element={
           <PrivateRoute>
             <InventoryPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <PrivateRoute>
+            <AdminPage />
           </PrivateRoute>
         }
       />

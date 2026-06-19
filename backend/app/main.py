@@ -6,6 +6,7 @@ from app import models  # noqa: F401 — registers models with SQLAlchemy
 from app.auth.router import router as auth_router
 from app.items.router import router as items_router
 from app.loans.router import router as loans_router
+from app.users.router import router as users_router
 
 app = FastAPI(title="Inventory Manager API")
 
@@ -23,6 +24,7 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(items_router)
 app.include_router(loans_router)
+app.include_router(users_router)
 
 
 @app.on_event("startup")

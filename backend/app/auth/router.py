@@ -68,6 +68,12 @@ def admin_register(
     return user
 
 
+@router.get("/me", response_model=UserResponse)
+def me(current_user=Depends(get_current_user)):
+    """Return the currently logged-in user's info."""
+    return current_user
+
+
 @router.post("/login", response_model=TokenResponse)
 def login(body: LoginRequest, db: Session = Depends(get_db)):
     """Log in and receive a JWT token."""
