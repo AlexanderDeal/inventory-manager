@@ -18,6 +18,20 @@ interface Item {
   price: number | null
 }
 
+const TYPE_OPTIONS = [
+  { value: 'purchasable', label: 'Buy',    dot: 'bg-green-500'  },
+  { value: 'rentable',    label: 'Rent',   dot: 'bg-purple-500' },
+  { value: 'loanable',    label: 'Borrow', dot: 'bg-blue-500'   },
+]
+
+const SORT_OPTIONS = [
+  { value: 'name-asc',    label: 'Name (A–Z)'          },
+  { value: 'name-desc',   label: 'Name (Z–A)'          },
+  { value: 'price-asc',   label: 'Price (Low–High)'    },
+  { value: 'price-desc',  label: 'Price (High–Low)'    },
+  { value: 'avail-desc',  label: 'Most Available'      },
+]
+
 export default function InventoryPage() {
   const { role, refreshBalance } = useAuth()
   const [items, setItems] = useState<Item[]>([])
@@ -28,6 +42,12 @@ export default function InventoryPage() {
   const [purchasingItem, setPurchasingItem] = useState<Item | null>(null)
   const [rentingItem, setRentingItem] = useState<Item | null>(null)
 
+  // Filter & sort state
+  const [search, setSearch] = useState('')
+  const [activeTypes, setActiveTypes] = useState<Set<string>>(new Set(['purchasable', 'rentable', 'loanable']))
+  const [inStockOnly, setInStockOnly] = useState(false)
+  const [sortBy, setSortBy] = useState('name-asc')
+
   const isManager = role === 'manager' || role === 'admin'
 
   useEffect(() => {
@@ -35,6 +55,38 @@ export default function InventoryPage() {
       .then(res => setItems(res.data))
       .catch(() => setError('Failed to load items'))
   }, [])
+
+  function toggleType(type: string) {
+    setActiveTypes(prev => {
+      const next = new Set(prev)
+      next.has(type) ? next.delete(type) : next.add(type)
+      return next
+    })
+  }
+
+  function clearFilters() {
+    setSearch('')
+    setActiveTypes(new Set(['purchasable', 'rentable', 'loanable']))
+    setInStockOnly(false)
+    setSortBy('name-asc')
+  }
+
+  const filteredItems = items
+    .filter(i => activeTypes.has(i.item_type))
+    .filter(i => !inStockOnly || i.available > 0)
+    .filter(i => !search || i.name.toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'name-asc':   return a.name.localeCompare(b.name)
+        case 'name-desc':  return b.name.localeCompare(a.name)
+        case 'price-asc':  return (a.price ?? 0) - (b.price ?? 0)
+        case 'price-desc': return (b.price ?? 0) - (a.price ?? 0)
+        case 'avail-desc': return b.available - a.available
+        default:           return 0
+      }
+    })
+
+  const isFiltered = search || activeTypes.size < 3 || inStockOnly || sortBy !== 'name-asc'
 
   async function handleBorrow(itemId: number) {
     setBorrowing(itemId)
@@ -66,23 +118,95 @@ export default function InventoryPage() {
     <div className="min-h-screen bg-gray-100">
       <Navbar />
 
-      <div className="max-w-5xl mx-auto p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold">Available Items</h2>
-          {isManager && (
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 transition"
-            >
-              + Add Item
-            </button>
-          )}
+      <div className="max-w-6xl mx-auto p-6 flex gap-6 items-start">
+
+        {/* Filter Sidebar */}
+        <div className="w-52 shrink-0 bg-white rounded-lg shadow p-4 sticky top-6">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="font-semibold text-gray-800 text-sm">Filters</h3>
+            {isFiltered && (
+              <button onClick={clearFilters} className="text-xs text-blue-600 hover:underline">
+                Clear
+              </button>
+            )}
+          </div>
+
+          {/* Search */}
+          <input
+            type="text"
+            placeholder="Search items..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+
+          {/* Item type */}
+          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Type</p>
+          <div className="space-y-2 mb-4">
+            {TYPE_OPTIONS.map(opt => (
+              <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={activeTypes.has(opt.value)}
+                  onChange={() => toggleType(opt.value)}
+                  className="rounded"
+                />
+                <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${opt.dot}`} />
+                <span className="text-sm text-gray-700">{opt.label}</span>
+              </label>
+            ))}
+          </div>
+
+          {/* Availability */}
+          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Availability</p>
+          <label className="flex items-center gap-2 cursor-pointer mb-4">
+            <input
+              type="checkbox"
+              checked={inStockOnly}
+              onChange={e => setInStockOnly(e.target.checked)}
+              className="rounded"
+            />
+            <span className="text-sm text-gray-700">In stock only</span>
+          </label>
+
+          {/* Sort */}
+          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Sort By</p>
+          <select
+            value={sortBy}
+            onChange={e => setSortBy(e.target.value)}
+            className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            {SORT_OPTIONS.map(opt => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
         </div>
 
-        {error && <p className="text-red-500 mb-4">{error}</p>}
+        {/* Main content */}
+        <div className="flex-1 min-w-0">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold">
+              Items
+              <span className="ml-2 text-sm font-normal text-gray-400">({filteredItems.length})</span>
+            </h2>
+            {isManager && (
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 transition"
+              >
+                + Add Item
+              </button>
+            )}
+          </div>
+
+          {error && <p className="text-red-500 mb-4">{error}</p>}
+
+          {filteredItems.length === 0 && !error && (
+            <p className="text-gray-500">No items match your filters.</p>
+          )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {items.map(item => (
+          {filteredItems.map(item => (
             <div key={item.id} className="bg-white rounded-lg shadow p-4 flex flex-col justify-between">
               <div>
                 <div className="flex justify-between items-start mb-2">
@@ -154,7 +278,8 @@ export default function InventoryPage() {
             </div>
           ))}
         </div>
-      </div>
+        </div>{/* end main content */}
+      </div>{/* end flex container */}
 
       {showCreateModal && (
         <CreateItemModal
