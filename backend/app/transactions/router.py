@@ -1,11 +1,20 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models import Item, Transaction, ItemType, TransactionType
+from app.models import Item, Transaction, ItemType, TransactionType, UserRole
 from app.transactions.schemas import TransactionCreate, TransactionResponse
-from app.auth.dependencies import get_current_user
+from app.auth.dependencies import get_current_user, require_roles
 
 router = APIRouter(prefix="/transactions", tags=["transactions"])
+
+
+@router.get("/all", response_model=list[TransactionResponse])
+def get_all_transactions(
+    db: Session = Depends(get_db),
+    current_user=Depends(require_roles(UserRole.admin)),
+):
+    """Return every transaction across all users. Admins only."""
+    return db.query(Transaction).order_by(Transaction.created_at.desc()).all()
 
 
 @router.get("/mine", response_model=list[TransactionResponse])
