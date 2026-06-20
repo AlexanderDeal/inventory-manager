@@ -127,7 +127,6 @@ export default function LoansPage() {
                   </div>
                   )
                 })}
-                ))}
               </div>
             )}
 

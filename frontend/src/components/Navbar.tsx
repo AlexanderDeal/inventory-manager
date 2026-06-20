@@ -35,7 +35,7 @@ export default function Navbar() {
         <div className="flex items-center gap-6">
           <h1
             className="text-xl font-bold cursor-pointer"
-            onClick={() => navigate('/inventory')}
+            onClick={() => navigate('/')}
           >
             Inventory Manager
           </h1>

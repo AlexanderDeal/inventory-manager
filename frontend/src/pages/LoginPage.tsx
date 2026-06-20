@@ -1,15 +1,20 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import api from '../api/client'
 import { useAuth } from '../context/AuthContext'
 
 export default function LoginPage() {
-  const { login } = useAuth()
+  const { login, isLoggedIn } = useAuth()
   const navigate = useNavigate()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+
+  // Navigate only after auth state has actually updated
+  useEffect(() => {
+    if (isLoggedIn) navigate('/')
+  }, [isLoggedIn])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -17,7 +22,6 @@ export default function LoginPage() {
     try {
       const res = await api.post('/auth/login', { email, password })
       login(res.data.access_token)
-      navigate('/inventory')
     } catch {
       setError('Invalid email or password')
     }
