@@ -59,7 +59,7 @@ export default function ChangePasswordModal({ onClose }: Props) {
                 value={current}
                 onChange={e => setCurrent(e.target.value)}
                 required
-                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
             <div>
@@ -69,7 +69,7 @@ export default function ChangePasswordModal({ onClose }: Props) {
                 value={next}
                 onChange={e => setNext(e.target.value)}
                 required
-                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
             <div>
@@ -79,7 +79,7 @@ export default function ChangePasswordModal({ onClose }: Props) {
                 value={confirm}
                 onChange={e => setConfirm(e.target.value)}
                 required
-                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
 
@@ -89,14 +89,14 @@ export default function ChangePasswordModal({ onClose }: Props) {
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 border border-gray-300 text-gray-600 py-2 rounded text-sm hover:bg-gray-50 transition"
+                className="flex-1 border border-gray-300 text-gray-600 py-2 rounded-lg text-sm hover:bg-gray-50 transition"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 bg-blue-600 text-white py-2 rounded text-sm hover:bg-blue-700 transition disabled:opacity-50"
+                className="flex-1 bg-blue-900 text-white py-2 rounded-lg text-sm hover:bg-blue-800 transition disabled:opacity-50"
               >
                 {loading ? 'Saving...' : 'Change Password'}
               </button>

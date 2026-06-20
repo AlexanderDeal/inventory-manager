@@ -9,6 +9,7 @@ class UserResponse(BaseModel):
     role: UserRole
     department: str | None
     is_active: bool
+    balance: float
 
     class Config:
         from_attributes = True
@@ -20,3 +21,11 @@ class UserRoleUpdate(BaseModel):
 
 class UserActiveUpdate(BaseModel):
     is_active: bool
+
+
+class BalanceUpdate(BaseModel):
+    balance: float
+
+
+class TopUpRequest(BaseModel):
+    amount: float

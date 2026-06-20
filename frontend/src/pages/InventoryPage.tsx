@@ -6,6 +6,7 @@ import CreateItemModal from '../components/CreateItemModal'
 import EditItemModal from '../components/EditItemModal'
 import PurchaseModal from '../components/PurchaseModal'
 import RentModal from '../components/RentModal'
+import BorrowModal from '../components/BorrowModal'
 
 interface Item {
   id: number
@@ -36,11 +37,11 @@ export default function InventoryPage() {
   const { role, refreshBalance } = useAuth()
   const [items, setItems] = useState<Item[]>([])
   const [error, setError] = useState('')
-  const [borrowing, setBorrowing] = useState<number | null>(null)
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [editingItem, setEditingItem] = useState<Item | null>(null)
   const [purchasingItem, setPurchasingItem] = useState<Item | null>(null)
   const [rentingItem, setRentingItem] = useState<Item | null>(null)
+  const [borrowingItem, setBorrowingItem] = useState<Item | null>(null)
 
   // Filter & sort state
   const [search, setSearch] = useState('')
@@ -88,18 +89,6 @@ export default function InventoryPage() {
 
   const isFiltered = search || activeTypes.size < 3 || inStockOnly || sortBy !== 'name-asc'
 
-  async function handleBorrow(itemId: number) {
-    setBorrowing(itemId)
-    try {
-      await api.post('/loans/', { item_id: itemId, due_date: null })
-      setItems(items.map(i => i.id === itemId ? { ...i, available: i.available - 1 } : i))
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to borrow item')
-    } finally {
-      setBorrowing(null)
-    }
-  }
-
   async function handleDelete(itemId: number) {
     if (!confirm('Are you sure you want to delete this item?')) return
     try {
@@ -115,13 +104,13 @@ export default function InventoryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
 
       <div className="max-w-6xl mx-auto p-6 flex gap-6 items-start">
 
         {/* Filter Sidebar */}
-        <div className="w-52 shrink-0 bg-white rounded-lg shadow p-4 sticky top-6">
+        <div className="w-52 shrink-0 bg-white rounded-xl shadow-sm border border-gray-100 p-4 sticky top-6">
           <div className="flex justify-between items-center mb-3">
             <h3 className="font-semibold text-gray-800 text-sm">Filters</h3>
             {isFiltered && (
@@ -184,15 +173,17 @@ export default function InventoryPage() {
 
         {/* Main content */}
         <div className="flex-1 min-w-0">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">
-              Items
-              <span className="ml-2 text-sm font-normal text-gray-400">({filteredItems.length})</span>
-            </h2>
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h1 className="text-xl font-bold text-gray-900">Inventory</h1>
+              <p className="text-sm text-gray-500 mt-0.5">
+                {filteredItems.length} {filteredItems.length === 1 ? 'item' : 'items'} available
+              </p>
+            </div>
             {isManager && (
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 transition"
+                className="bg-blue-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-800 transition"
               >
                 + Add Item
               </button>
@@ -202,12 +193,18 @@ export default function InventoryPage() {
           {error && <p className="text-red-500 mb-4">{error}</p>}
 
           {filteredItems.length === 0 && !error && (
-            <p className="text-gray-500">No items match your filters.</p>
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <svg className="w-12 h-12 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+              </svg>
+              <p className="text-gray-500 font-medium">No items match your filters</p>
+              <p className="text-sm text-gray-400 mt-1">Try adjusting your search or filter options</p>
+            </div>
           )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredItems.map(item => (
-            <div key={item.id} className="bg-white rounded-lg shadow p-4 flex flex-col justify-between">
+            <div key={item.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex flex-col justify-between hover:shadow-md transition-shadow">
               <div>
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="font-semibold text-gray-900">{item.name}</h3>
@@ -249,11 +246,11 @@ export default function InventoryPage() {
                   </button>
                 ) : (
                   <button
-                    onClick={() => handleBorrow(item.id)}
-                    disabled={item.available === 0 || borrowing === item.id}
+                    onClick={() => setBorrowingItem(item)}
+                    disabled={item.available === 0}
                     className="w-full bg-blue-600 text-white py-2 rounded text-sm hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {borrowing === item.id ? 'Borrowing...' : item.available === 0 ? 'Unavailable' : 'Borrow'}
+                    {item.available === 0 ? 'Unavailable' : 'Borrow'}
                   </button>
                 )}
                 {isManager && (
@@ -309,6 +306,15 @@ export default function InventoryPage() {
           item={rentingItem}
           onClose={() => setRentingItem(null)}
           onRented={itemId =>
+            setItems(items.map(i => i.id === itemId ? { ...i, available: i.available - 1 } : i))
+          }
+        />
+      )}
+      {borrowingItem && (
+        <BorrowModal
+          item={borrowingItem}
+          onClose={() => setBorrowingItem(null)}
+          onBorrowed={itemId =>
             setItems(items.map(i => i.id === itemId ? { ...i, available: i.available - 1 } : i))
           }
         />

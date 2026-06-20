@@ -44,6 +44,7 @@ class User(Base):
     role = Column(Enum(UserRole), default=UserRole.student, nullable=False)
     department = Column(String, nullable=True)
     is_active = Column(Boolean, default=True)
+    balance = Column(Float, default=0.0, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     # Relationships — lets you do user.loans to get all loans for a user

@@ -77,22 +77,22 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
 
       <div className="max-w-5xl mx-auto p-6 space-y-6">
 
         {/* Welcome banner */}
-        <div className="bg-white rounded-xl shadow p-6 flex items-center justify-between">
+        <div className="bg-gradient-to-r from-blue-900 to-blue-600 rounded-2xl shadow-lg p-6 flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Welcome back, {username}!</h2>
-            <span className="inline-block mt-1 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded capitalize font-medium">
+            <h2 className="text-2xl font-bold text-white">Welcome back, {username}!</h2>
+            <span className="inline-block mt-1.5 text-xs bg-white/20 text-white px-2.5 py-0.5 rounded-full capitalize font-medium">
               {roleLabel[role ?? ''] ?? role}
             </span>
           </div>
           <button
             onClick={() => navigate('/inventory')}
-            className="bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition"
+            className="bg-white text-blue-900 px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-50 transition shadow-sm"
           >
             Browse Inventory
           </button>
@@ -118,18 +118,15 @@ export default function HomePage() {
 
         {/* Stats row */}
         <div className={`grid gap-4 ${role === 'admin' ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-2 sm:grid-cols-3'}`}>
-          <div className="bg-white rounded-xl shadow p-5">
+          <div className="bg-white rounded-xl shadow-sm border-t-4 border-green-500 p-5">
             <p className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">Balance</p>
             <p className="text-2xl font-bold text-green-600">${balance.toFixed(2)}</p>
-            <button
-              onClick={() => setShowAddFunds(true)}
-              className="mt-2 text-xs text-blue-600 hover:underline"
-            >
+            <button onClick={() => setShowAddFunds(true)} className="mt-2 text-xs text-blue-600 hover:underline">
               Add Funds
             </button>
           </div>
 
-          <div className="bg-white rounded-xl shadow p-5">
+          <div className="bg-white rounded-xl shadow-sm border-t-4 border-blue-500 p-5">
             <p className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">Active Loans</p>
             <p className="text-2xl font-bold text-blue-600">{activeLoans.length}</p>
             {overdueLoans.length > 0 && (
@@ -137,19 +134,16 @@ export default function HomePage() {
             )}
           </div>
 
-          <div className="bg-white rounded-xl shadow p-5">
+          <div className="bg-white rounded-xl shadow-sm border-t-4 border-purple-500 p-5">
             <p className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">Total Purchases</p>
             <p className="text-2xl font-bold text-purple-600">{transactions.length}</p>
           </div>
 
           {role === 'admin' && userCount !== null && (
-            <div className="bg-white rounded-xl shadow p-5">
+            <div className="bg-white rounded-xl shadow-sm border-t-4 border-blue-900 p-5">
               <p className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">Total Users</p>
-              <p className="text-2xl font-bold text-gray-700">{userCount}</p>
-              <button
-                onClick={() => navigate('/admin')}
-                className="mt-2 text-xs text-blue-600 hover:underline"
-              >
+              <p className="text-2xl font-bold text-blue-900">{userCount}</p>
+              <button onClick={() => navigate('/admin')} className="mt-2 text-xs text-blue-600 hover:underline">
                 Manage Users
               </button>
             </div>
@@ -206,7 +200,7 @@ export default function HomePage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
           {/* Recent loans */}
-          <div className="bg-white rounded-xl shadow p-5">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-semibold text-gray-800">Recent Loans</h3>
               <button onClick={() => navigate('/loans')} className="text-xs text-blue-600 hover:underline">
@@ -242,7 +236,7 @@ export default function HomePage() {
           </div>
 
           {/* Recent purchases */}
-          <div className="bg-white rounded-xl shadow p-5">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-semibold text-gray-800">Recent Purchases</h3>
               <button onClick={() => navigate('/loans')} className="text-xs text-blue-600 hover:underline">

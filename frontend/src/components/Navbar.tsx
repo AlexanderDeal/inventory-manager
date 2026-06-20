@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import AddFundsModal from './AddFundsModal'
 import ChangePasswordModal from './ChangePasswordModal'
@@ -7,6 +7,7 @@ import ChangePasswordModal from './ChangePasswordModal'
 export default function Navbar() {
   const { username, role, email, department, balance, logout } = useAuth()
   const navigate = useNavigate()
+  const { pathname } = useLocation()
   const [open, setOpen] = useState(false)
   const [showAddFunds, setShowAddFunds] = useState(false)
   const [showChangePassword, setShowChangePassword] = useState(false)
@@ -31,17 +32,21 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="bg-white shadow px-6 py-3 flex justify-between items-center">
+      <nav className="bg-blue-900 px-6 py-3 flex justify-between items-center shadow-lg">
         <div className="flex items-center gap-6">
           <h1
-            className="text-xl font-bold cursor-pointer"
+            className="text-xl font-bold text-white cursor-pointer tracking-tight"
             onClick={() => navigate('/')}
           >
             Inventory Manager
           </h1>
           <button
             onClick={() => navigate('/inventory')}
-            className="text-sm text-gray-600 hover:text-blue-600 transition"
+            className={`text-sm transition pb-0.5 border-b-2 ${
+              pathname === '/inventory'
+                ? 'text-white border-white'
+                : 'text-blue-200 hover:text-white border-transparent'
+            }`}
           >
             Inventory
           </button>
@@ -50,17 +55,17 @@ export default function Navbar() {
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setOpen(o => !o)}
-            className="flex items-center gap-2 hover:bg-gray-50 rounded-lg px-3 py-1.5 transition"
+            className="flex items-center gap-2 hover:bg-blue-800 rounded-lg px-3 py-1.5 transition"
           >
-            <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-semibold shrink-0">
+            <div className="w-8 h-8 bg-white text-blue-900 rounded-full flex items-center justify-center text-sm font-bold shrink-0">
               {initial}
             </div>
             <div className="text-left hidden sm:block">
-              <p className="text-sm font-medium text-gray-800 leading-tight">{username}</p>
-              <p className="text-xs text-gray-400 capitalize leading-tight">{role}</p>
+              <p className="text-sm font-medium text-white leading-tight">{username}</p>
+              <p className="text-xs text-blue-300 capitalize leading-tight">{role}</p>
             </div>
             <svg
-              className={`w-4 h-4 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`}
+              className={`w-4 h-4 text-blue-300 transition-transform ${open ? 'rotate-180' : ''}`}
               fill="none" viewBox="0 0 24 24" stroke="currentColor"
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />

@@ -66,23 +66,36 @@ export default function LoansPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
 
       <div className="max-w-4xl mx-auto p-6">
+        <div className="mb-6">
+          <h1 className="text-xl font-bold text-gray-900">My Activity</h1>
+          <p className="text-sm text-gray-500 mt-0.5">Your loans, borrows, and purchases</p>
+        </div>
+
         {error && <p className="text-red-500 mb-4">{error}</p>}
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6">
+        <div className="flex gap-2 mb-6 border-b border-gray-200 pb-0">
           <button
             onClick={() => setActiveTab('loans')}
-            className={`px-4 py-2 rounded font-medium text-sm ${activeTab === 'loans' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+            className={`px-4 py-2.5 font-medium text-sm rounded-t-lg transition border-b-2 -mb-px ${
+              activeTab === 'loans'
+                ? 'border-blue-900 text-blue-900 bg-white'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+            }`}
           >
             My Loans ({loans.length})
           </button>
           <button
             onClick={() => setActiveTab('purchases')}
-            className={`px-4 py-2 rounded font-medium text-sm ${activeTab === 'purchases' ? 'bg-green-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+            className={`px-4 py-2.5 font-medium text-sm rounded-t-lg transition border-b-2 -mb-px ${
+              activeTab === 'purchases'
+                ? 'border-blue-900 text-blue-900 bg-white'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+            }`}
           >
             My Purchases ({transactions.length})
           </button>
@@ -93,13 +106,19 @@ export default function LoansPage() {
           <>
             <h2 className="text-lg font-semibold mb-4">Active Loans ({activeLoans.length})</h2>
             {activeLoans.length === 0 ? (
-              <p className="text-gray-500 mb-8">No active loans.</p>
+              <div className="bg-white rounded-xl border border-gray-100 shadow-sm flex flex-col items-center justify-center py-12 text-center mb-8">
+                <svg className="w-10 h-10 text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <p className="text-gray-500 font-medium">No active loans</p>
+                <p className="text-sm text-gray-400 mt-1">Items you borrow or rent will appear here</p>
+              </div>
             ) : (
               <div className="space-y-3 mb-8">
                 {activeLoans.map(loan => {
                   const overdue = isOverdue(loan)
                   return (
-                  <div key={loan.id} className={`rounded-lg shadow p-4 flex justify-between items-center ${overdue ? 'bg-red-50 border border-red-200' : 'bg-white'}`}>
+                  <div key={loan.id} className={`rounded-xl shadow-sm p-4 flex justify-between items-center ${overdue ? 'bg-red-50 border border-red-200' : 'bg-white border border-gray-100'}`}>
                     <div>
                       <div className="flex items-center gap-2 mb-0.5">
                         <p className="font-medium">{itemMap[loan.item_id] || `Item #${loan.item_id}`}</p>
@@ -132,11 +151,13 @@ export default function LoansPage() {
 
             <h2 className="text-lg font-semibold mb-4">Past Loans ({pastLoans.length})</h2>
             {pastLoans.length === 0 ? (
-              <p className="text-gray-500">No past loans.</p>
+              <div className="bg-white rounded-xl border border-gray-100 shadow-sm flex flex-col items-center justify-center py-10 text-center">
+                <p className="text-gray-400 text-sm">No past loans yet</p>
+              </div>
             ) : (
               <div className="space-y-3">
                 {pastLoans.map(loan => (
-                  <div key={loan.id} className="bg-white rounded-lg shadow p-4 opacity-60">
+                  <div key={loan.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 opacity-60">
                     <p className="font-medium">{itemMap[loan.item_id] || `Item #${loan.item_id}`}</p>
                     <p className="text-sm text-gray-500">
                       Borrowed: {new Date(loan.loaned_at).toLocaleDateString()}
@@ -156,9 +177,15 @@ export default function LoansPage() {
           <>
             <h2 className="text-lg font-semibold mb-4">Purchase History</h2>
             {transactions.length === 0 ? (
-              <p className="text-gray-500">No purchases yet.</p>
+              <div className="bg-white rounded-xl border border-gray-100 shadow-sm flex flex-col items-center justify-center py-12 text-center">
+                <svg className="w-10 h-10 text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                <p className="text-gray-500 font-medium">No purchases yet</p>
+                <p className="text-sm text-gray-400 mt-1">Items you buy will appear here</p>
+              </div>
             ) : (
-              <div className="bg-white rounded-lg shadow overflow-hidden">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <table className="w-full text-sm">
                   <thead className="bg-gray-50 text-left">
                     <tr>

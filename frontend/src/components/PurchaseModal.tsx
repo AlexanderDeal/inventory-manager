@@ -40,8 +40,8 @@ export default function PurchaseModal({ item, onClose, onPurchased }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-sm p-6">
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-sm mx-4 p-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-bold">Confirm Purchase</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
@@ -57,11 +57,11 @@ export default function PurchaseModal({ item, onClose, onPurchased }: Props) {
             max={item.available}
             value={quantity}
             onChange={e => setQuantity(Number(e.target.value))}
-            className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
-        <div className="bg-gray-50 rounded p-3 mb-4 text-sm space-y-1">
+        <div className="bg-gray-50 rounded-lg p-3 mb-4 text-sm space-y-1">
           <div className="flex justify-between">
             <span className="text-gray-600">Price per item</span>
             <span>${item.price?.toFixed(2)}</span>
@@ -84,14 +84,14 @@ export default function PurchaseModal({ item, onClose, onPurchased }: Props) {
         <div className="flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 border border-gray-300 text-gray-700 py-2 rounded hover:bg-gray-50 transition"
+            className="flex-1 border border-gray-300 text-gray-600 py-2 rounded-lg text-sm hover:bg-gray-50 transition"
           >
             Cancel
           </button>
           <button
             onClick={handleConfirm}
             disabled={submitting || quantity < 1 || quantity > item.available || !canAfford}
-            className="flex-1 bg-green-600 text-white py-2 rounded hover:bg-green-700 transition disabled:opacity-50"
+            className="flex-1 bg-green-600 text-white py-2 rounded-lg text-sm hover:bg-green-700 transition disabled:opacity-50"
           >
             {submitting ? 'Processing...' : 'Confirm Purchase'}
           </button>

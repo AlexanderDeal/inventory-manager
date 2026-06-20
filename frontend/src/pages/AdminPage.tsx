@@ -160,15 +160,24 @@ export default function AdminPage() {
   const maxActivity = userActivity[0]?.total ?? 1
 
   const tabClass = (t: Tab) =>
-    `px-4 py-2 rounded font-medium text-sm transition ${activeTab === t ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`
+    `px-4 py-2.5 font-medium text-sm rounded-t-lg transition border-b-2 -mb-px ${
+      activeTab === t
+        ? 'border-blue-900 text-blue-900 bg-white'
+        : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+    }`
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
 
       <div className="max-w-6xl mx-auto p-6">
+        <div className="mb-6">
+          <h1 className="text-xl font-bold text-gray-900">Admin Dashboard</h1>
+          <p className="text-sm text-gray-500 mt-0.5">Manage users, loans, and view analytics</p>
+        </div>
+
         {/* Tabs */}
-        <div className="flex gap-2 mb-6">
+        <div className="flex gap-2 mb-6 border-b border-gray-200 pb-0">
           <button onClick={() => setActiveTab('users')} className={tabClass('users')}>
             Users ({users.length})
           </button>
@@ -182,7 +191,7 @@ export default function AdminPage() {
 
         {/* Users Tab */}
         {activeTab === 'users' && (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <table className="w-full text-sm">
               <thead className="bg-gray-50 text-left">
                 <tr>
@@ -250,7 +259,7 @@ export default function AdminPage() {
 
         {/* Loans Tab */}
         {activeTab === 'loans' && (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <table className="w-full text-sm">
               <thead className="bg-gray-50 text-left">
                 <tr>
@@ -288,17 +297,17 @@ export default function AdminPage() {
 
             {/* Revenue cards */}
             <div className="grid grid-cols-3 gap-4">
-              <div className="bg-white rounded-xl shadow p-5">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
                 <p className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">Total Revenue</p>
                 <p className="text-2xl font-bold text-green-600">${totalRevenue.toFixed(2)}</p>
                 <p className="text-xs text-gray-400 mt-1">{transactions.length} transactions</p>
               </div>
-              <div className="bg-white rounded-xl shadow p-5">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
                 <p className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">From Purchases</p>
                 <p className="text-2xl font-bold text-gray-800">${purchaseRevenue.toFixed(2)}</p>
                 <p className="text-xs text-gray-400 mt-1">{transactions.filter(t => t.transaction_type === 'purchase').length} purchases</p>
               </div>
-              <div className="bg-white rounded-xl shadow p-5">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
                 <p className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-1">From Rentals</p>
                 <p className="text-2xl font-bold text-purple-600">${rentalRevenue.toFixed(2)}</p>
                 <p className="text-xs text-gray-400 mt-1">{transactions.filter(t => t.transaction_type === 'rental').length} rentals</p>
@@ -307,7 +316,7 @@ export default function AdminPage() {
 
             {/* User stats */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="bg-white rounded-xl shadow p-5">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
                 <h3 className="font-semibold text-gray-800 mb-1">Users by Role</h3>
                 <p className="text-xs text-gray-400 mb-4">{users.length} total · {activeUsers} active · {users.length - activeUsers} inactive</p>
                 <div className="space-y-3">
@@ -328,7 +337,7 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl shadow p-5">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
                 <h3 className="font-semibold text-gray-800 mb-1">Items by Type</h3>
                 <p className="text-xs text-gray-400 mb-4">{items.length} items · {totalAvailable}/{totalStock} units available</p>
                 <div className="space-y-3">
@@ -351,7 +360,7 @@ export default function AdminPage() {
             </div>
 
             {/* Loan status */}
-            <div className="bg-white rounded-xl shadow p-5">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
               <h3 className="font-semibold text-gray-800 mb-4">Loan Status Breakdown</h3>
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
@@ -372,7 +381,7 @@ export default function AdminPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
               {/* Top borrowed items */}
-              <div className="bg-white rounded-xl shadow p-5">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
                 <h3 className="font-semibold text-gray-800 mb-4">Most Borrowed / Rented</h3>
                 {topBorrowed.length === 0 ? (
                   <p className="text-sm text-gray-400">No loan data yet.</p>
@@ -397,7 +406,7 @@ export default function AdminPage() {
               </div>
 
               {/* Top revenue items */}
-              <div className="bg-white rounded-xl shadow p-5">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
                 <h3 className="font-semibold text-gray-800 mb-4">Top Items by Revenue</h3>
                 {topRevenue.length === 0 ? (
                   <p className="text-sm text-gray-400">No transaction data yet.</p>
@@ -423,7 +432,7 @@ export default function AdminPage() {
             </div>
 
             {/* Most active users */}
-            <div className="bg-white rounded-xl shadow p-5">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
               <h3 className="font-semibold text-gray-800 mb-4">Most Active Users</h3>
               {userActivity.filter(u => u.total > 0).length === 0 ? (
                 <p className="text-sm text-gray-400">No activity yet.</p>
@@ -454,7 +463,7 @@ export default function AdminPage() {
             </div>
 
             {/* Recent transactions */}
-            <div className="bg-white rounded-xl shadow overflow-hidden">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
               <div className="px-5 py-4 border-b border-gray-100">
                 <h3 className="font-semibold text-gray-800">Recent Transactions</h3>
               </div>
