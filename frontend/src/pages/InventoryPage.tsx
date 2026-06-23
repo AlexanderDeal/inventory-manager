@@ -246,7 +246,7 @@ export default function InventoryPage() {
                     {item.image_url && (
                       <img src={item.image_url} alt={item.name} className="w-full h-36 object-cover" />
                     )}
-                    <div className="p-4 flex flex-col flex-1">
+                    <div className="p-4 flex flex-col flex-1 justify-between">
                     <div>
                       <div className="flex justify-between items-start mb-2">
                         <h3 className="font-semibold text-gray-900">{item.name}</h3>
