@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import api from '../api/client'
 
 interface Item {
@@ -10,6 +10,7 @@ interface Item {
   available: number
   department: string | null
   price: number | null
+  image_url: string | null
 }
 
 interface Props {
@@ -27,11 +28,48 @@ export default function EditItemModal({ item, onClose, onUpdated }: Props) {
     department: item.department || '',
     price: item.price?.toString() || '',
   })
+  const [imagePreview, setImagePreview] = useState<string | null>(item.image_url)
+  const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     setForm({ ...form, [e.target.name]: e.target.value })
+  }
+
+  async function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    setError('')
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const res = await api.post(`/items/${item.id}/image`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      setImagePreview(res.data.image_url)
+      onUpdated(res.data)
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'Failed to upload image')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  async function handleRemoveImage() {
+    setUploading(true)
+    setError('')
+    try {
+      const res = await api.delete(`/items/${item.id}/image`)
+      setImagePreview(null)
+      onUpdated(res.data)
+    } catch {
+      setError('Failed to remove image')
+    } finally {
+      setUploading(false)
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -59,10 +97,67 @@ export default function EditItemModal({ item, onClose, onUpdated }: Props) {
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6 max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-5">
           <h2 className="text-lg font-semibold">Edit Item</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
+        </div>
+
+        {/* Image section */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">Photo</label>
+          {imagePreview ? (
+            <div className="relative">
+              <img
+                src={imagePreview}
+                alt={item.name}
+                className="w-full h-40 object-cover rounded-lg border border-gray-200"
+              />
+              <div className="absolute top-2 right-2 flex gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="bg-white/90 text-gray-700 text-xs px-2.5 py-1 rounded-lg shadow hover:bg-white transition"
+                >
+                  Change
+                </button>
+                <button
+                  type="button"
+                  onClick={handleRemoveImage}
+                  disabled={uploading}
+                  className="bg-white/90 text-red-600 text-xs px-2.5 py-1 rounded-lg shadow hover:bg-white transition"
+                >
+                  Remove
+                </button>
+              </div>
+              {uploading && (
+                <div className="absolute inset-0 bg-white/60 rounded-lg flex items-center justify-center">
+                  <p className="text-sm text-gray-500">Uploading...</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="w-full h-28 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center gap-2 text-gray-400 hover:border-blue-400 hover:text-blue-500 transition"
+            >
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span className="text-sm">{uploading ? 'Uploading...' : 'Click to upload photo'}</span>
+              <span className="text-xs">JPEG, PNG, WebP — max 2MB</span>
+            </button>
+          )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            onChange={handleImageChange}
+            className="hidden"
+          />
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">

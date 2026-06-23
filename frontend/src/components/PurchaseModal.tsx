@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import api from '../api/client'
 import { useAuth } from '../context/AuthContext'
+import { useToast } from '../context/ToastContext'
 
 interface Item {
   id: number
   name: string
   price: number | null
   available: number
+  image_url: string | null
 }
 
 interface Props {
@@ -17,6 +19,7 @@ interface Props {
 
 export default function PurchaseModal({ item, onClose, onPurchased }: Props) {
   const { balance } = useAuth()
+  const { showToast } = useToast()
   const [quantity, setQuantity] = useState(1)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -30,6 +33,7 @@ export default function PurchaseModal({ item, onClose, onPurchased }: Props) {
     setError('')
     try {
       await api.post('/transactions/', { item_id: item.id, quantity })
+      showToast(`Purchased ${quantity}× ${item.name}`)
       onPurchased(item.id, quantity)
       onClose()
     } catch (err: any) {
@@ -47,6 +51,9 @@ export default function PurchaseModal({ item, onClose, onPurchased }: Props) {
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
         </div>
 
+        {item.image_url && (
+          <img src={item.image_url} alt={item.name} className="w-full h-32 object-cover rounded-lg mb-4" />
+        )}
         <p className="text-gray-600 mb-4">You are purchasing <span className="font-semibold">{item.name}</span>.</p>
 
         <div className="mb-4">

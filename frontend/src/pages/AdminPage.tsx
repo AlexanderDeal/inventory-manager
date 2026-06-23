@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import api from '../api/client'
 import Navbar from '../components/Navbar'
+import { SkeletonStatCard, SkeletonRow } from '../components/Skeleton'
 
 interface User {
   id: number
@@ -62,6 +63,7 @@ export default function AdminPage() {
   const [items, setItems] = useState<Item[]>([])
   const [itemMap, setItemMap] = useState<Record<number, string>>({})
   const [userMap, setUserMap] = useState<Record<number, string>>({})
+  const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<Tab>('users')
   const [editingBalance, setEditingBalance] = useState<Record<number, string>>({})
 
@@ -82,6 +84,7 @@ export default function AdminPage() {
       const uMap: Record<number, string> = {}
       usersRes.data.forEach((user: User) => { uMap[user.id] = user.username })
       setUserMap(uMap)
+      setLoading(false)
     })
   }, [])
 
@@ -190,7 +193,11 @@ export default function AdminPage() {
         </div>
 
         {/* Users Tab */}
-        {activeTab === 'users' && (
+        {activeTab === 'users' && (loading ? (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 divide-y divide-gray-100">
+            {Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)}
+          </div>
+        ) : (
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <table className="w-full text-sm">
               <thead className="bg-gray-50 text-left">
@@ -255,10 +262,14 @@ export default function AdminPage() {
               </tbody>
             </table>
           </div>
-        )}
+        ))}
 
         {/* Loans Tab */}
-        {activeTab === 'loans' && (
+        {activeTab === 'loans' && (loading ? (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 divide-y divide-gray-100">
+            {Array.from({ length: 8 }).map((_, i) => <SkeletonRow key={i} />)}
+          </div>
+        ) : (
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <table className="w-full text-sm">
               <thead className="bg-gray-50 text-left">
@@ -289,10 +300,26 @@ export default function AdminPage() {
               </tbody>
             </table>
           </div>
-        )}
+        ))}
 
         {/* Analytics Tab */}
-        {activeTab === 'analytics' && (
+        {activeTab === 'analytics' && (loading ? (
+          <div className="space-y-6">
+            <div className="grid grid-cols-3 gap-4">
+              {Array.from({ length: 3 }).map((_, i) => <SkeletonStatCard key={i} />)}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+                <div className="h-4 bg-gray-200 rounded w-1/3 mb-4 animate-pulse" />
+                {Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} />)}
+              </div>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+                <div className="h-4 bg-gray-200 rounded w-1/3 mb-4 animate-pulse" />
+                {Array.from({ length: 3 }).map((_, i) => <SkeletonRow key={i} />)}
+              </div>
+            </div>
+          </div>
+        ) : (
           <div className="space-y-6">
 
             {/* Revenue cards */}
@@ -502,7 +529,7 @@ export default function AdminPage() {
             </div>
 
           </div>
-        )}
+        ))}
       </div>
     </div>
   )

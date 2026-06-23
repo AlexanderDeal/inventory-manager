@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import api from '../api/client'
 import { useAuth } from '../context/AuthContext'
+import { useToast } from '../context/ToastContext'
 
 interface Item {
   id: number
   name: string
   price: number | null
+  image_url: string | null
 }
 
 interface Props {
@@ -23,6 +25,7 @@ const DURATIONS = [
 
 export default function RentModal({ item, onClose, onRented }: Props) {
   const { balance, refreshBalance } = useAuth()
+  const { showToast } = useToast()
   const [days, setDays] = useState(3)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -43,6 +46,7 @@ export default function RentModal({ item, onClose, onRented }: Props) {
         due_date: dueDate.toISOString(),
       })
       refreshBalance()
+      showToast(`${item.name} rented — due ${dueDate.toLocaleDateString()}`)
       onRented(item.id)
       onClose()
     } catch (err: any) {
@@ -60,6 +64,9 @@ export default function RentModal({ item, onClose, onRented }: Props) {
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
         </div>
 
+        {item.image_url && (
+          <img src={item.image_url} alt={item.name} className="w-full h-32 object-cover rounded-lg mb-4" />
+        )}
         <p className="text-gray-600 mb-1">
           Renting <span className="font-semibold">{item.name}</span>
         </p>

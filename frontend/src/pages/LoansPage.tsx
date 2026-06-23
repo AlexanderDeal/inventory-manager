@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import api from '../api/client'
 import Navbar from '../components/Navbar'
+import { useToast } from '../context/ToastContext'
+import { SkeletonLoanCard, SkeletonRow } from '../components/Skeleton'
 
 interface Loan {
   id: number
@@ -25,9 +27,11 @@ interface Item {
 }
 
 export default function LoansPage() {
+  const { showToast } = useToast()
   const [loans, setLoans] = useState<Loan[]>([])
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [itemMap, setItemMap] = useState<Record<number, string>>({})
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [activeTab, setActiveTab] = useState<'loans' | 'purchases'>('loans')
 
@@ -45,11 +49,14 @@ export default function LoansPage() {
         setItemMap(map)
       })
       .catch(() => setError('Failed to load data'))
+      .finally(() => setLoading(false))
   }, [])
 
   async function handleReturn(loanId: number) {
     try {
       await api.patch(`/loans/${loanId}/return`)
+      const itemName = itemMap[loans.find(l => l.id === loanId)?.item_id ?? 0]
+      showToast(itemName ? `${itemName} returned` : 'Item returned')
       setLoans(loans.map(l =>
         l.id === loanId ? { ...l, status: 'returned', returned_at: new Date().toISOString() } : l
       ))
@@ -105,7 +112,11 @@ export default function LoansPage() {
         {activeTab === 'loans' && (
           <>
             <h2 className="text-lg font-semibold mb-4">Active Loans ({activeLoans.length})</h2>
-            {activeLoans.length === 0 ? (
+            {loading ? (
+              <div className="space-y-3 mb-8">
+                {Array.from({ length: 3 }).map((_, i) => <SkeletonLoanCard key={i} />)}
+              </div>
+            ) : activeLoans.length === 0 ? (
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm flex flex-col items-center justify-center py-12 text-center mb-8">
                 <svg className="w-10 h-10 text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -176,7 +187,11 @@ export default function LoansPage() {
         {activeTab === 'purchases' && (
           <>
             <h2 className="text-lg font-semibold mb-4">Purchase History</h2>
-            {transactions.length === 0 ? (
+            {loading ? (
+              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 divide-y divide-gray-100">
+                {Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} />)}
+              </div>
+            ) : transactions.length === 0 ? (
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm flex flex-col items-center justify-center py-12 text-center">
                 <svg className="w-10 h-10 text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />

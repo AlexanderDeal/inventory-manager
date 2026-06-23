@@ -34,12 +34,20 @@ export default function Navbar() {
     <>
       <nav className="bg-blue-900 px-6 py-3 flex justify-between items-center shadow-lg">
         <div className="flex items-center gap-6">
-          <h1
-            className="text-xl font-bold text-white cursor-pointer tracking-tight"
+          <div
+            className="flex items-center gap-2 cursor-pointer"
             onClick={() => navigate('/')}
           >
-            Inventory Manager
-          </h1>
+            <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M16 7L23 11V21L16 25L9 21V11L16 7Z" stroke="white" strokeWidth="1.5" strokeLinejoin="round"/>
+              <path d="M16 7V25" stroke="white" strokeWidth="1.5"/>
+              <path d="M9 11L23 11" stroke="white" strokeWidth="1.5"/>
+              <path d="M9 11L16 15L23 11" stroke="white" strokeWidth="1.5" strokeLinejoin="round"/>
+            </svg>
+            <h1 className="text-xl font-bold text-white tracking-tight">
+              Inventory Manager
+            </h1>
+          </div>
           <button
             onClick={() => navigate('/inventory')}
             className={`text-sm transition pb-0.5 border-b-2 ${

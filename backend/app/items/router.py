@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException
+import base64
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import Item, UserRole
@@ -68,6 +69,43 @@ def update_item(
     for field, value in body.model_dump(exclude_unset=True).items():
         setattr(item, field, value)
 
+    db.commit()
+    db.refresh(item)
+    return item
+
+
+@router.post("/{item_id}/image", response_model=ItemResponse)
+async def upload_item_image(
+    item_id: int,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user=Depends(require_roles(UserRole.manager, UserRole.admin)),
+):
+    item = db.query(Item).filter(Item.id == item_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    if file.content_type not in ["image/jpeg", "image/png", "image/webp", "image/gif"]:
+        raise HTTPException(status_code=400, detail="Only JPEG, PNG, WebP, or GIF images are allowed")
+    contents = await file.read()
+    if len(contents) > 2 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Image must be under 2MB")
+    b64 = base64.b64encode(contents).decode("utf-8")
+    item.image_url = f"data:{file.content_type};base64,{b64}"
+    db.commit()
+    db.refresh(item)
+    return item
+
+
+@router.delete("/{item_id}/image", response_model=ItemResponse)
+def delete_item_image(
+    item_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_roles(UserRole.manager, UserRole.admin)),
+):
+    item = db.query(Item).filter(Item.id == item_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    item.image_url = None
     db.commit()
     db.refresh(item)
     return item

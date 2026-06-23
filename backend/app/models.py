@@ -1,6 +1,6 @@
 import enum
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, Enum, ForeignKey, DateTime, Float, Boolean
+from sqlalchemy import Column, Integer, String, Enum, ForeignKey, DateTime, Float, Boolean, Text
 from sqlalchemy.orm import relationship
 from app.database import Base
 
@@ -63,6 +63,7 @@ class Item(Base):
     available = Column(Integer, default=0)         # currently available
     department = Column(String, nullable=True)
     price = Column(Float, nullable=True)           # only used for purchasable items
+    image_url = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     loans = relationship("Loan", back_populates="item")

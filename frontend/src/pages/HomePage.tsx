@@ -4,6 +4,7 @@ import api from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import Navbar from '../components/Navbar'
 import AddFundsModal from '../components/AddFundsModal'
+import { SkeletonStatCard, SkeletonRow } from '../components/Skeleton'
 
 interface Loan {
   id: number
@@ -26,6 +27,7 @@ export default function HomePage() {
   const { username, role, balance } = useAuth()
   const navigate = useNavigate()
 
+  const [returning, setReturning] = useState<number | null>(null)
   const [loans, setLoans] = useState<Loan[]>([])
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [itemMap, setItemMap] = useState<Record<number, string>>({})
@@ -53,6 +55,18 @@ export default function HomePage() {
     }
   }, [role])
 
+  async function handleReturn(loanId: number) {
+    setReturning(loanId)
+    try {
+      await api.patch(`/loans/${loanId}/return`)
+      setLoans(loans.map(l =>
+        l.id === loanId ? { ...l, status: 'returned', returned_at: new Date().toISOString() } : l
+      ))
+    } finally {
+      setReturning(null)
+    }
+  }
+
   const activeLoans = loans.filter(l => l.status === 'active')
   const overdueLoans = activeLoans.filter(l => l.due_date && new Date(l.due_date) < new Date())
   const recentLoans = [...loans].sort((a, b) => new Date(b.loaned_at).getTime() - new Date(a.loaned_at).getTime()).slice(0, 4)
@@ -67,10 +81,23 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100">
+      <div className="min-h-screen bg-gray-50">
         <Navbar />
-        <div className="flex items-center justify-center h-64">
-          <p className="text-gray-400">Loading...</p>
+        <div className="max-w-5xl mx-auto p-6 space-y-6">
+          <div className="bg-gray-200 rounded-2xl h-28 animate-pulse" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {Array.from({ length: 3 }).map((_, i) => <SkeletonStatCard key={i} />)}
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+              <div className="h-4 bg-gray-200 rounded w-1/3 mb-4 animate-pulse" />
+              {Array.from({ length: 3 }).map((_, i) => <SkeletonRow key={i} />)}
+            </div>
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+              <div className="h-4 bg-gray-200 rounded w-1/3 mb-4 animate-pulse" />
+              {Array.from({ length: 3 }).map((_, i) => <SkeletonRow key={i} />)}
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -221,13 +248,23 @@ export default function HomePage() {
                         </p>
                         <p className="text-xs text-gray-400">{new Date(loan.loaned_at).toLocaleDateString()}</p>
                       </div>
-                      <span className={`text-xs px-2 py-0.5 rounded ml-2 shrink-0 ${
-                        overdue ? 'bg-red-100 text-red-700' :
-                        loan.status === 'active' ? 'bg-blue-100 text-blue-700' :
-                        'bg-gray-100 text-gray-500'
-                      }`}>
-                        {overdue ? 'Overdue' : loan.status}
-                      </span>
+                      {loan.status === 'active' ? (
+                        <button
+                          onClick={() => handleReturn(loan.id)}
+                          disabled={returning === loan.id}
+                          className={`text-xs px-2.5 py-1 rounded-lg ml-2 shrink-0 transition ${
+                            overdue
+                              ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                              : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                          } disabled:opacity-50`}
+                        >
+                          {returning === loan.id ? '...' : overdue ? 'Overdue · Return' : 'Return'}
+                        </button>
+                      ) : (
+                        <span className="text-xs px-2 py-0.5 rounded ml-2 shrink-0 bg-gray-100 text-gray-500">
+                          returned
+                        </span>
+                      )}
                     </div>
                   )
                 })}

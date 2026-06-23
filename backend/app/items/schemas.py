@@ -32,6 +32,7 @@ class ItemResponse(BaseModel):
     available: int
     department: str | None
     price: float | None
+    image_url: str | None
 
     class Config:
         from_attributes = True

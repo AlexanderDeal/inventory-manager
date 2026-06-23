@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import api from '../api/client'
+import { useToast } from '../context/ToastContext'
 
 interface Item {
   id: number
   name: string
   description: string | null
   department: string | null
+  image_url: string | null
 }
 
 interface Props {
@@ -22,6 +24,7 @@ const DURATIONS = [
 ]
 
 export default function BorrowModal({ item, onClose, onBorrowed }: Props) {
+  const { showToast } = useToast()
   const [days, setDays] = useState(3)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -34,6 +37,7 @@ export default function BorrowModal({ item, onClose, onBorrowed }: Props) {
     setError('')
     try {
       await api.post('/loans/', { item_id: item.id, due_date: dueDate.toISOString() })
+      showToast(`${item.name} borrowed — due ${dueDate.toLocaleDateString()}`)
       onBorrowed(item.id)
       onClose()
     } catch (err: any) {
@@ -51,6 +55,9 @@ export default function BorrowModal({ item, onClose, onBorrowed }: Props) {
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
         </div>
 
+        {item.image_url && (
+          <img src={item.image_url} alt={item.name} className="w-full h-32 object-cover rounded-lg mb-4" />
+        )}
         <p className="text-gray-600 mb-1">
           Borrowing <span className="font-semibold">{item.name}</span>
         </p>
