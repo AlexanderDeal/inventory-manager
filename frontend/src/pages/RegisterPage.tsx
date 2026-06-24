@@ -1,9 +1,15 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import api from '../api/client'
+import { useAuth } from '../context/AuthContext'
 
 export default function RegisterPage() {
   const navigate = useNavigate()
+  const { login, isLoggedIn } = useAuth()
+
+  useEffect(() => {
+    if (isLoggedIn) navigate('/')
+  }, [isLoggedIn])
 
   const [form, setForm] = useState({
     username: '',
@@ -23,7 +29,8 @@ export default function RegisterPage() {
     setError('')
     try {
       await api.post('/auth/register', form)
-      navigate('/login')
+      const loginRes = await api.post('/auth/login', { email: form.email, password: form.password })
+      login(loginRes.data.access_token)
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Registration failed')
     }
@@ -46,7 +53,7 @@ export default function RegisterPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
-              <input type="email" name="email" value={form.email} onChange={handleChange} className={inputClass} placeholder="you@university.edu" required />
+              <input type="email" name="email" value={form.email} onChange={handleChange} className={inputClass} placeholder="you@university.edu" pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}" required />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
