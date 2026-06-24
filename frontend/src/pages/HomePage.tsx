@@ -75,7 +75,6 @@ export default function HomePage() {
   const roleLabel: Record<string, string> = {
     student: 'Student',
     staff: 'Staff',
-    manager: 'Manager',
     admin: 'Admin',
   }
 

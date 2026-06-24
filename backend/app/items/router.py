@@ -35,7 +35,7 @@ def get_item(
 def create_item(
     body: ItemCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_roles(UserRole.manager, UserRole.admin)),
+    current_user=Depends(require_roles(UserRole.staff, UserRole.admin)),
 ):
     """Create a new item. Managers and admins only."""
     item = Item(
@@ -58,7 +58,7 @@ def update_item(
     item_id: int,
     body: ItemUpdate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_roles(UserRole.manager, UserRole.admin)),
+    current_user=Depends(require_roles(UserRole.staff, UserRole.admin)),
 ):
     """Update an item's fields. Managers and admins only."""
     item = db.query(Item).filter(Item.id == item_id).first()
@@ -79,7 +79,7 @@ async def upload_item_image(
     item_id: int,
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
-    current_user=Depends(require_roles(UserRole.manager, UserRole.admin)),
+    current_user=Depends(require_roles(UserRole.staff, UserRole.admin)),
 ):
     item = db.query(Item).filter(Item.id == item_id).first()
     if not item:
@@ -100,7 +100,7 @@ async def upload_item_image(
 def delete_item_image(
     item_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_roles(UserRole.manager, UserRole.admin)),
+    current_user=Depends(require_roles(UserRole.staff, UserRole.admin)),
 ):
     item = db.query(Item).filter(Item.id == item_id).first()
     if not item:

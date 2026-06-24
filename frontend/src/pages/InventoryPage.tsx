@@ -53,7 +53,7 @@ export default function InventoryPage() {
   const [sortBy, setSortBy] = useState('name-asc')
   const [showFilters, setShowFilters] = useState(false)
 
-  const isManager = role === 'manager' || role === 'admin'
+  const isManager = role === 'staff' || role === 'admin'
 
   useEffect(() => {
     api.get('/items/')

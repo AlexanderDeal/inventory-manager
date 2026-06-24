@@ -8,7 +8,7 @@ from app.auth.dependencies import get_current_user, require_roles
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-RESTRICTED_ROLES = {UserRole.staff, UserRole.manager, UserRole.admin}
+RESTRICTED_ROLES = {UserRole.staff, UserRole.admin}
 
 
 @router.post("/register", response_model=UserResponse, status_code=201)
@@ -21,7 +21,7 @@ def register(body: RegisterRequest, db: Session = Depends(get_db)):
     if body.role in RESTRICTED_ROLES:
         raise HTTPException(
             status_code=403,
-            detail="Cannot self-register as manager or admin"
+            detail="Cannot self-register as staff or admin"
         )
 
     # Check if email or username is already taken

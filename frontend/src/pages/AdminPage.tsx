@@ -43,11 +43,10 @@ interface Item {
 
 type Tab = 'users' | 'loans' | 'analytics'
 
-const ROLES = ['student', 'staff', 'manager', 'admin']
+const ROLES = ['student', 'staff', 'admin']
 const ROLE_COLORS: Record<string, string> = {
   student: 'bg-blue-500',
-  staff: 'bg-green-500',
-  manager: 'bg-orange-500',
+  staff: 'bg-orange-500',
   admin: 'bg-purple-500',
 }
 const TYPE_COLORS: Record<string, string> = {
@@ -84,6 +83,9 @@ export default function AdminPage() {
       const uMap: Record<number, string> = {}
       usersRes.data.forEach((user: User) => { uMap[user.id] = user.username })
       setUserMap(uMap)
+    }).catch(err => {
+      console.error('Admin dashboard failed to load:', err)
+    }).finally(() => {
       setLoading(false)
     })
   }, [])
@@ -224,7 +226,6 @@ export default function AdminPage() {
                       >
                         <option value="student">Student</option>
                         <option value="staff">Staff</option>
-                        <option value="manager">Manager</option>
                         <option value="admin">Admin</option>
                       </select>
                     </td>

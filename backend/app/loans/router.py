@@ -80,7 +80,7 @@ def get_loans(
     Get loans. Managers and admins see all loans.
     Students and staff only see their own.
     """
-    if current_user.role in (UserRole.manager, UserRole.admin):
+    if current_user.role in (UserRole.staff, UserRole.admin):
         return db.query(Loan).all()
 
     return db.query(Loan).filter(Loan.user_id == current_user.id).all()
@@ -101,7 +101,7 @@ def get_loan(
     if not loan:
         raise HTTPException(status_code=404, detail="Loan not found")
 
-    if current_user.role not in (UserRole.manager, UserRole.admin):
+    if current_user.role not in (UserRole.staff, UserRole.admin):
         if loan.user_id != current_user.id:
             raise HTTPException(status_code=403, detail="You can only view your own loans")
 
@@ -124,7 +124,7 @@ def return_loan(
         raise HTTPException(status_code=404, detail="Loan not found")
 
     # Students can only return their own loans
-    if current_user.role not in (UserRole.manager, UserRole.admin):
+    if current_user.role not in (UserRole.staff, UserRole.admin):
         if loan.user_id != current_user.id:
             raise HTTPException(status_code=403, detail="You can only return your own loans")
 
