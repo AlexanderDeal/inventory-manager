@@ -1,10 +1,14 @@
 # Inventory Manager
 
-A full-stack university inventory management system with role-based access control, built as a portfolio project.
+A full-stack university inventory management system with role-based access control. 
+This project was inspired by a class assignment where we designed a system for our 
+university to track inventory across multiple departments. The class focused on 
+planning and documenting large systems with UML diagrams. 
+I decided to actually build it.
 
 **[Live Demo](https://inventory-manager-demo.netlify.app)** · **[API Docs](https://inventory-manager-api-9mjl.onrender.com/docs)**
 
-> ⚠️ The backend runs on Render's free tier and may take 30–60 seconds to wake up on first load.
+> ⚠️ The backend runs on Render's free tier and may take 30–60 seconds to wake up on first load. 
 
 ---
 
@@ -13,7 +17,14 @@ A full-stack university inventory management system with role-based access contr
 | Role | Email | Password |
 |------|-------|----------|
 | Admin | `admin@university.edu` | `password123` |
+| Staff | `staff@university.edu` | `password123` |
 | Student | `student@university.edu` | `password123` |
+
+| Role | Can Do |
+|------|--------|
+| Student | Browse inventory, borrow/rent/buy items, view own activity |
+| Staff | Everything students can + add and edit items |
+| Admin | Everything staff can + delete items, manage users, view analytics |
 
 ---
 
@@ -82,7 +93,9 @@ npm run dev
 ---
 
 ## Screenshots
-<img width="1257" height="1341" alt="Screenshot 2026-06-23 185940" src="https://github.com/user-attachments/assets/0b18c3e9-0522-4d77-9ee4-c0f53110ecb2" />
-<img width="1270" height="1340" alt="Screenshot 2026-06-23 185913" src="https://github.com/user-attachments/assets/eafb2ec1-45d9-437b-b935-4a3a0556510b" />
+
 <img width="1274" height="761" alt="Screenshot 2026-06-23 185856" src="https://github.com/user-attachments/assets/b0be18a9-ec23-434f-ad30-63069dd29315" />
 
+<img width="1253" height="1340" alt="Screenshot 2026-06-23 185913" src="https://github.com/user-attachments/assets/8b2a1eb6-0a3c-4c54-ae79-9f63ad03541c" />
+
+<img width="1257" height="1341" alt="Screenshot 2026-06-23 185940" src="https://github.com/user-attachments/assets/0b18c3e9-0522-4d77-9ee4-c0f53110ecb2" />
